@@ -18,6 +18,9 @@ public class HangmanController implements ActionListener{
     private HangmanPanel panel;
     private KategorienLesen leser;
     private int fehler = 0;
+/**/private boolean ersterVersuch = true;
+/**/private int score = 0;
+/**/private int highScore = 0;
     private String ganzVok;
     private HangmanDraw draw;
 
@@ -25,6 +28,7 @@ public class HangmanController implements ActionListener{
         this.model = model;
         this.panel = panel;
         this.leser = new KategorienLesen();
+        highScore = leser.readScore();
     }
 
      @Override
@@ -36,8 +40,16 @@ public class HangmanController implements ActionListener{
                 panel.getVokabelLabel().setText(zufallsVokabel);
             }
 
+        }else if(ganzVok == null){
+            return;
         }else if(e.getActionCommand().equals("Übersetzt")) {
             if(!panel.getTextBoxText().equals(model.getDeutschVokabel(ganzVok)) && fehler <= 8){
+/**/            if(ersterVersuch){
+                    ersterVersuch = false;
+                    String vokabel = model.getDeutschVokabel(ganzVok);
+                    panel.setTextBox(vokabel.charAt(0) + "..." + vokabel.charAt(vokabel.length()-1));
+                    return;
+                }
                 fehler++;
                 HangmanDraw draw = new HangmanDraw(this);
                 panel.repaintHangman();
@@ -47,9 +59,20 @@ public class HangmanController implements ActionListener{
                     String zufallsVokabel = ladeZufaelligeVokabel(kategorie);
                     panel.getVokabelLabel().setText(zufallsVokabel);
                     panel.setTextBox();
+/**/                ersterVersuch = true;
+/**/                score++;
+/**/                if(score > highScore){
+                        highScore = score;
+                    }
                 }
 
+            }else if(fehler > 8){
+                JOptionPane.showMessageDialog(null, "Super! Du konntest " + score + " Wörter richtig übersetzen\nDein Highscore liegt bei " + highScore, "Ende", JOptionPane.INFORMATION_MESSAGE);
+                reset();
             }
+        }else if(e.getActionCommand().equals("Zurück")){
+/**/        HangMain.changePanel(HangMain.getStartSeite());
+            leser.writeScore(highScore);
         }
      }
 
@@ -72,6 +95,23 @@ public class HangmanController implements ActionListener{
         return fehler;
     }
 
+    public void reset(){
+        score = 0;
+        ersterVersuch = true;
+        fehler = 0;
+        String kategorie = (String) panel.getAusgewaehlteKategorie();
+        if (kategorie != null) {
+            String zufallsVokabel = ladeZufaelligeVokabel(kategorie);
+            panel.getVokabelLabel().setText(zufallsVokabel);
+            panel.setTextBox();
+        }
+        panel.repaintHangman();
+        leser.writeScore(highScore);
+    }
+
+    public void aktualisiereHighScore(){
+        this.highScore = leser.readScore();
+    }
 
 }
 

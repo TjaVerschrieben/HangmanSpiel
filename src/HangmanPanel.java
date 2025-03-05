@@ -14,7 +14,7 @@ public class HangmanPanel extends JPanel {
     private JComboBox<String> kategorien; // Kategorien-Dropdown
     private JLabel vokabelLabel; // Zeigt die zufällige Vokabel an
     private JTextField textBox; // Eingabefeld für den Nutzer
-    private JButton startB;
+/**/private JButton startB, zurueckB;
     private HangmanController hang;
     private HangmanModel model;
     private HangmanDraw hangmanDraw;
@@ -23,7 +23,7 @@ public class HangmanPanel extends JPanel {
         this.setLayout(new BorderLayout()); // Setzt explizit BorderLayout für das Panel
 
         this.model = model;
-        HangmanController hang = new HangmanController(model, this);
+        hang = new HangmanController(model, this);
         String[] kategorieListe = model.getKategorien();
         kategorien = new JComboBox<>(kategorieListe);
         kategorien.setActionCommand("KatVerändert");
@@ -34,7 +34,6 @@ public class HangmanPanel extends JPanel {
         pKategorien.setLayout(new FlowLayout(FlowLayout.CENTER)); // Links ausgerichtet
         pKategorien.add(new JLabel("Kategorie:"));
         pKategorien.add(kategorien);
-
         hangmanDraw = new HangmanDraw(hang);
         // **OBERE GRAUE FLÄCHE**
         JPanel pOben = new JPanel();
@@ -73,11 +72,19 @@ public class HangmanPanel extends JPanel {
         gbc.gridy = 2;
         gbc.weighty = 1.0;
         gbc.anchor = GridBagConstraints.SOUTH;
-        pCenter.add(pUnten, gbc); // Textfeld
+/**/    //pCenter.add(pUnten, gbc); // Textfeld
+
+        // **LINKE SEITE: Zurück Button**
+        zurueckB = new JButton("<");
+        zurueckB.setActionCommand("Zurück");
+        zurueckB.addActionListener(hang);
+        zurueckB.setSize(new Dimension(50, 50));
 
         // **KOMPONENTEN HINZUFÜGEN**
         this.add(pKategorien, BorderLayout.NORTH);  // Kategorien-Dropdown kommt ganz oben
+        this.add(pUnten, BorderLayout.SOUTH);
         this.add(pCenter, BorderLayout.CENTER);     // Rest kommt in die Mitte
+        this.add(zurueckB, BorderLayout.WEST);
     }
 
     public String getAusgewaehlteKategorie() {
@@ -96,7 +103,14 @@ public class HangmanPanel extends JPanel {
         this.textBox.setText("");
     }
 
+/**/public void setTextBox(String text){this.textBox.setText(text);}
+
     public void repaintHangman() {
         hangmanDraw.repaintHangman();
     }
+
+    public void reloadScore(){
+        hang.aktualisiereHighScore();
+    }
+
 }

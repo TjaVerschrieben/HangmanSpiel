@@ -1,9 +1,7 @@
-import javax.swing.*;
+import javax.swing.*;import javax.swing.text.html.HTMLDocument;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Scanner;
+import java.io.*;
+import java.util.HashMap;import java.util.Iterator;import java.util.Map;import java.util.Scanner;
 
 /**
  * loadKategorie() liest aus der Datei die Kategorien aus und gibt sie zurück
@@ -88,6 +86,83 @@ public class KategorienLesen {
             }
             return z;
         }
+    }
+
+    public void writeScore(int score){
+        try(FileWriter fw = new FileWriter("Score.txt")){
+            fw.write("" + score);
+        }catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public int readScore(){
+        try(Scanner y = new Scanner(new BufferedReader (new FileReader("Score.txt")))){
+            if(y.hasNextInt()){
+                return y.nextInt();
+            }else{
+                return 0;
+            }
+        }catch (FileNotFoundException e) {
+            return 0;
+        }
+    }
+
+    public void writeKategorie(String kategorie, String[] vokabeln){
+        try {
+            String[] kategorien = this.loadKategorie();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        boolean gotKategorie = vokabeln == null ? true : false;
+        Map<String, String[]> map = new HashMap<>();
+        for(int i = 0; i < kategorien.length; i++){
+            if(!kategorien[i].equals(kategorie)){
+                try {
+                    map.put(kategorien[i], loadVokabeln(kategorien[i]));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }else if(vokabeln != null){
+                map.put(kategorie, vokabeln);
+                gotKategorie = true;
+            }
+        }
+        if(!gotKategorie){
+            map.put(kategorie, vokabeln);
+        }
+
+        if(map.size() < 1){
+            return;
+        }
+
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter("Vokabeln.txt"))){
+            Iterator<Map.Entry<String, String[]>> iterator = map.entrySet().iterator();
+
+                while (iterator.hasNext()) {
+                    Map.Entry<String, String[]> entry = iterator.next();
+
+                    writer.write('$'); // Trennzeichen für eine neue Kategorie
+                    writer.newLine();
+                    writer.write(entry.getKey()); // Kategorie (Key) schreiben
+
+                    // Durch das Array im Value gehen und jedes Element schreiben
+                    for (String s : entry.getValue()) {
+                        writer.newLine();
+                        writer.write(s);
+                    }
+
+                    // Falls noch weitere Elemente in der Map vorhanden sind → Leerzeilen einfügen
+                    if (iterator.hasNext()) {
+                        writer.newLine();
+                        writer.newLine();
+                    }
+                }
+        }catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+
     }
 
 }
